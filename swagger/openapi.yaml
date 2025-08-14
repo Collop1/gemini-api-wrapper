@@ -1,0 +1,94 @@
+openapi: 3.0.0
+info:
+  title: Gemini Prompt Wrapper API
+  version: 1.0.0
+  description: API wrapper for Google's Gemini AI model that handles text generation requests
+paths:
+  /api/generate:
+    post:
+      summary: Generate content using Gemini 2.0 Flash
+      description: Sends a prompt to Gemini AI and returns the generated response
+      tags:
+        - Generation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - prompt
+              properties:
+                prompt:
+                  type: string
+                  description: The text prompt to send to Gemini AI
+                  example: "Write a poem about spring"
+                  minLength: 1
+                  maxLength: 1000
+      responses:
+        '200':
+          description: Successful response from Gemini
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerationResponse'
+        '400':
+          description: Invalid input parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingPrompt:
+                  value:
+                    success: false
+                    error: "Prompt is required"
+                promptTooLong:
+                  value:
+                    success: false
+                    error: "Prompt must be less than 1000 characters"
+        '500':
+          description: Server error or Gemini API error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: "Failed to connect to Gemini API"
+
+components:
+  schemas:
+    GenerationRequest:
+      type: object
+      required:
+        - prompt
+      properties:
+        prompt:
+          type: string
+          description: The text prompt for generation
+          minLength: 1
+          maxLength: 1000
+    GenerationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: string
+          description: Generated content from Gemini
+          example: "Cherry blossoms dance in air..."
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Error message describing what went wrong
+
+tags:
+  - name: Generation
+    description: Endpoints for text generation using Gemini AI
